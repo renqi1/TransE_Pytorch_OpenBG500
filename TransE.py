@@ -69,16 +69,18 @@ class TransE(nn.Module):
             hits_10_num = torch.sum(torch.eq(indices[:, :10], tail)).item()
             return mrr, hits_1_num, hits_3_num, hits_10_num     # 返回一个batchsize, mrr的和，hit@k的和
         return indices[:, :k]
+    
+    def evaluate(self, data_loader, dev_num=5000):
+        mrr_sum = hits_1_nums = hits_3_nums = hits_10_nums = 0
+        for heads, relations, tails in tqdm.tqdm(data_loader):
+            mrr_sum_batch, hits_1_num, hits_3_num, hits_10_num = self.link_predict(heads.cuda(), relations.cuda(), tails.cuda())
+            mrr_sum += mrr_sum_batch
+            hits_1_nums += hits_1_num
+            hits_3_nums += hits_3_num
+            hits_10_nums += hits_10_num
+        return mrr_sum/dev_num, hits_1_nums/dev_num, hits_3_nums/dev_num, hits_10_nums/dev_num
 
-def evaluate(model, data_loader, dev_num=5000):
-    mrr_sum = hits_1_nums = hits_3_nums = hits_10_nums = 0
-    for heads, relations, tails in tqdm.tqdm(data_loader):
-        mrr_sum_batch, hits_1_num, hits_3_num, hits_10_num = model.link_predict(heads.cuda(), relations.cuda(), tails.cuda())
-        mrr_sum += mrr_sum_batch
-        hits_1_nums += hits_1_num
-        hits_3_nums += hits_3_num
-        hits_10_nums += hits_10_num
-    return mrr_sum/dev_num, hits_1_nums/dev_num, hits_3_nums/dev_num, hits_10_nums/dev_num
+
 
 if __name__ == '__main__':
     # 读取数据
@@ -120,7 +122,7 @@ if __name__ == '__main__':
     model = TransE(len(ent2id), len(rel2id), norm=3, dim=100).cuda()
     # model.load_state_dict(torch.load('transE.pth'))
 
-    # mrr, hits1, hits3, hits10 = evaluate(model, dev_data_loader)
+    # mrr, hits1, hits3, hits10 = model.evaluate(dev_data_loader)
     # print(f'mrr: {mrr}, hit@1: {hits1}, hit@3: {hits3}, hit@10: {hits10}')
 
     # 优化器adam, 学习率建议0.001-0.0001之间
@@ -163,7 +165,7 @@ if __name__ == '__main__':
         if validation and (epoch+1) % dev_interval == 0:
             print('testing...')
             improve = ''
-            mrr, hits1, hits3, hits10 = evaluate(model, dev_data_loader)
+            mrr, hits1, hits3, hits10 = model.evaluate(dev_data_loader)
             if mrr > best_mrr:
                 best_mrr = mrr
                 improve = '*'
