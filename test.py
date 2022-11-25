@@ -1,4 +1,5 @@
 import torch
+import tqdm
 from torch.utils import data
 from TransE import TransE
 
@@ -43,7 +44,7 @@ model.load_state_dict(torch.load('transE.pth'))
 model.eval()
 
 predict_all = []
-for i, (heads, relations) in enumerate(test_data_loader):
+for heads, relations in tqdm.tqdm(test_data_loader):
     # 预测的id,结果为tensor(batch_size*10)
     predict_id = model.link_predict(heads.cuda(), relations.cuda())
     # 结果取到cpu并转为一行的list以便迭代
@@ -52,8 +53,6 @@ for i, (heads, relations) in enumerate(test_data_loader):
     predict_ent = list(map(lambda x: id2ent[x], predict_list))
     # 保存结果
     predict_all.extend(predict_ent)
-    # 看看进度
-    print(f'{i}/{len(test_data_loader)}')
 
 # 写入文件，按提交要求
 with open('submission.tsv', 'w', encoding='utf-8') as f:
