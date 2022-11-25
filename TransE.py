@@ -81,7 +81,6 @@ class TransE(nn.Module):
         return mrr_sum/dev_num, hits_1_nums/dev_num, hits_3_nums/dev_num, hits_10_nums/dev_num
 
 
-
 if __name__ == '__main__':
     # 读取数据
     with open('OpenBG500/OpenBG500_entity2text.tsv', 'r', encoding='utf-8') as fp:
@@ -104,11 +103,11 @@ if __name__ == '__main__':
     dev_batch_size = 20  # 显存不够就调小
     epochs = 40
     margin = 1
-    print_frequency = 5 # 每多少step输出一次信息
+    print_frequency = 5  # 每多少step输出一次信息
     validation = True  # 是否验证，验证比较费时，注意loss不是越小效果越好哦!!!
     dev_interval = 5  # 每多少轮验证一次
     best_mrr = 0
-    learning_rate = 0.0005  # 学习率建议0.001-0.0001之间
+    learning_rate = 0.001  # 学习率建议粗调0.01-0.001，精调0.001-0.0001
     distance_norm = 3  # 论文是L1距离效果不好，取2或3效果好
     embedding_dim = 100  # 维度增大可能会有提升
 
