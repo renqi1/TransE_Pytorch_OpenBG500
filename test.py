@@ -60,3 +60,4 @@ with open('submission.tsv', 'w', encoding='utf-8') as f:
         # 直接writelines没有空格分隔，手工加分割符，得按提交格式来
         list = [x + '\t' for x in test[i]] + [x + '\n' if i == 9 else x + '\t' for i, x in enumerate(predict_all[i*10:i*10+10])]
         f.writelines(list)
+print('file saved !')
