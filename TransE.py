@@ -99,18 +99,18 @@ if __name__ == '__main__':
         dat = fp.readlines()
         dev = [line.strip('\n').split('\t') for line in dat]
 
-    # 定义常量，batchsize增大，得分略有上升
-    train_batch_size = 10000
-    dev_batch_size = 10
-    epochs = 50
+    # 参数设置
+    train_batch_size = 100000  # batchsize增大，得分略有上升
+    dev_batch_size = 20  # 显存不够就调小
+    epochs = 40
     margin = 1
-    print_frequency = 10
-
-    # 是否需要验证，以及多少轮验证一次，验证会保存最优权重
-    # 验证比较费时，你可以选择不验证，但注意loss不是越小效果越好哦!!!
-    validation = True
-    dev_interval = 1
+    print_frequency = 5 # 每多少step输出一次信息
+    validation = True  # 是否验证，验证比较费时，注意loss不是越小效果越好哦!!!
+    dev_interval = 5  # 每多少轮验证一次
     best_mrr = 0
+    learning_rate = 0.0005  # 学习率建议0.001-0.0001之间
+    distance_norm = 3  # 论文是L1距离效果不好，取2或3效果好
+    embedding_dim = 100  # 维度增大可能会有提升
 
     # 构建数据集
     train_dataset = TripleDataset(ent2id, rel2id, train)
@@ -118,15 +118,15 @@ if __name__ == '__main__':
     train_data_loader = data.DataLoader(train_dataset, batch_size=train_batch_size, shuffle=True)
     dev_data_loader = data.DataLoader(dev_dataset, batch_size=dev_batch_size)
 
-    # 构建模型, 论文norm=1, 但建议norm=2或3效果较好
-    model = TransE(len(ent2id), len(rel2id), norm=3, dim=100).cuda()
+    # 构建模型
+    model = TransE(len(ent2id), len(rel2id), norm=distance_norm, dim=embedding_dim).cuda()
     # model.load_state_dict(torch.load('transE.pth'))
 
     # mrr, hits1, hits3, hits10 = model.evaluate(dev_data_loader)
     # print(f'mrr: {mrr}, hit@1: {hits1}, hit@3: {hits3}, hit@10: {hits10}')
 
-    # 优化器adam, 学习率建议0.001-0.0001之间
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.0005)
+    # 优化器adam
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
     # 损失函数， 对于本例，loss=max(0, (pd-nd)+1)， 负样本距离越小，正样本距离越大越好
     criterion = nn.MarginRankingLoss(margin=margin, reduction='mean')
@@ -166,7 +166,7 @@ if __name__ == '__main__':
             print('testing...')
             improve = ''
             mrr, hits1, hits3, hits10 = model.evaluate(dev_data_loader)
-            if mrr > best_mrr:
+            if mrr >= best_mrr:
                 best_mrr = mrr
                 improve = '*'
                 torch.save(model.state_dict(), 'transE_best.pth')
