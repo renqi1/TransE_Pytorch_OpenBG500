@@ -39,8 +39,8 @@ class TransE(nn.Module):
         return embedding
 
     def forward(self, positive_triplets: torch.LongTensor, negative_triplets: torch.LongTensor):
-        positive_distances = self._distance(positive_triplets.cuda())
-        negative_distances = self._distance(negative_triplets.cuda())
+        positive_distances = self._distance(positive_triplets)
+        negative_distances = self._distance(negative_triplets)
         return positive_distances, negative_distances
 
     def _distance(self, triplets):
