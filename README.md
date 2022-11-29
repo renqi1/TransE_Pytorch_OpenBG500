@@ -10,4 +10,4 @@ Paper: https://proceedings.neurips.cc/paper/2013/file/1cecc7a77928ca8133fa24680a
 
 OpenBG500：https://github.com/OpenBGBenchmark/OpenBG500
 
-更高分：可以试试用神经网络作为embedding层来理解句子的含义，我试过bert，不行，根本算不动，120多万条跑到何年何月啊，效果还不一定好
+更高分：可以试试用一些神经网络模型作为embedding层来理解句子的含义，比如TextCNN，TextRNN之类的，应该能上55+，比赛要结束了没时间了，我懒得做了，后面如果有空我再写写吧（估计没空），不要用bert，不行的，根本算不动，120多万条跑到何年何月啊，效果还不一定好。
